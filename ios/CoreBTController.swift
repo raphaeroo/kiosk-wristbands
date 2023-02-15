@@ -137,23 +137,29 @@ public class CoreBTController: NSObject, CBCentralManagerDelegate, CBPeripheralD
       return
     }
     
+    guard let writeCharacterstic = self.myWriteCharacterstic else {
+      return
+    }
+    
     if let dataBuffer = self.writeDataBuffer {
       while BLEDevice.canSendWriteWithoutResponse && dataBuffer.length > 0 {
         var dataPacket: Data;
         
-        if dataBuffer.length > BLEDevice.maximumWriteValueLength(for: CBCharacteristicWriteType.withoutResponse) {
-          dataPacket = dataBuffer.subdata(with: NSMakeRange(0, BLEDevice.maximumWriteValueLength(for: CBCharacteristicWriteType.withoutResponse))) as Data
+        if dataBuffer.length > BLEDevice.maximumWriteValueLength(for: .withoutResponse) {
+          dataPacket = dataBuffer.subdata(with: NSMakeRange(0, BLEDevice.maximumWriteValueLength(for: .withoutResponse)))
           
-          BLEDevice.writeValue(dataPacket, for: self.myWriteCharacterstic!, type: CBCharacteristicWriteType.withoutResponse)
+          BLEDevice.writeValue(dataPacket, for: writeCharacterstic, type: .withoutResponse)
           
-          self.writeDataBuffer?.replaceBytes(in: NSMakeRange(0, BLEDevice.maximumWriteValueLength(for: CBCharacteristicWriteType.withoutResponse)), withBytes: nil, length: 0)
+          let range = NSMakeRange(0, min(BLEDevice.maximumWriteValueLength(for: .withoutResponse), self.writeDataBuffer?.length ?? 0))
+          self.writeDataBuffer?.replaceBytes(in: range, withBytes: nil, length: 0)
         } else {
-          BLEDevice.writeValue(dataBuffer as Data, for: self.myWriteCharacterstic!, type: CBCharacteristicWriteType.withoutResponse)
+          BLEDevice.writeValue(dataBuffer as Data, for: writeCharacterstic, type: .withoutResponse)
           self.writeDataBuffer?.length = 0
         }
       }
     }
   }
+}
   
 }
 
