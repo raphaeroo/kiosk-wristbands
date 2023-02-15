@@ -160,8 +160,6 @@ public class CoreBTController: NSObject, CBCentralManagerDelegate, CBPeripheralD
     }
   }
 }
-  
-}
 
 @available(iOS 13.0, *)
 extension CoreBTController {
